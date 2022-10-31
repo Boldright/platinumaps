@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="PMQRCodeReaderViewController" customModule="niseko" customModuleProvider="target">
+            <connections>
+                <outlet property="baseView" destination="1vL-uw-4Hv" id="mld-tr-4XC"/>
+                <outlet property="cancelButton" destination="CU5-5p-mud" id="bBN-Up-asX"/>
+                <outlet property="cancelButtonHeightConstraint" destination="s4F-HV-LTL" id="yHK-7r-wBJ"/>
+                <outlet property="messageLabel" destination="jOH-Ba-zMT" id="D5B-gF-fKC"/>
+                <outlet property="previewView" destination="ASl-LV-W1z" id="VsG-DS-lBN"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1vL-uw-4Hv" userLabel="Base View">
+                    <rect key="frame" x="20" y="135" width="374" height="626.5"/>
+                    <subviews>
+                        <view clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="ASl-LV-W1z" customClass="PMCameraPreviewView" customModule="niseko" customModuleProvider="target">
+                            <rect key="frame" x="0.0" y="0.0" width="374" height="448"/>
+                            <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        </view>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jOH-Ba-zMT">
+                            <rect key="frame" x="97" y="480" width="180" height="38.5"/>
+                            <string key="text">カメラを二次元コードに
+向けてください。</string>
+                            <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                            <nil key="textColor"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CU5-5p-mud" userLabel="Cancel Button">
+                            <rect key="frame" x="93.5" y="550.5" width="187" height="44"/>
+                            <color key="backgroundColor" red="0.76078431372549016" green="0.76078431372549016" blue="0.76078431372549016" alpha="1" colorSpace="calibratedRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="44" id="s4F-HV-LTL"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
+                            <state key="normal" title="キャンセル"/>
+                            <connections>
+                                <action selector="onCancelButtonTapped:" destination="-1" eventType="touchUpInside" id="n7s-aa-xuP"/>
+                            </connections>
+                        </button>
+                    </subviews>
+                    <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    <constraints>
+                        <constraint firstItem="CU5-5p-mud" firstAttribute="centerX" secondItem="1vL-uw-4Hv" secondAttribute="centerX" id="CFt-XA-KwU"/>
+                        <constraint firstAttribute="trailing" secondItem="ASl-LV-W1z" secondAttribute="trailing" id="HZg-9M-Ff2"/>
+                        <constraint firstItem="ASl-LV-W1z" firstAttribute="leading" secondItem="1vL-uw-4Hv" secondAttribute="leading" id="IpL-Ev-dl5"/>
+                        <constraint firstItem="jOH-Ba-zMT" firstAttribute="top" secondItem="ASl-LV-W1z" secondAttribute="bottom" constant="32" id="Lxp-YE-4ey"/>
+                        <constraint firstItem="ASl-LV-W1z" firstAttribute="top" secondItem="1vL-uw-4Hv" secondAttribute="top" id="Tjh-ai-2QP"/>
+                        <constraint firstItem="CU5-5p-mud" firstAttribute="top" secondItem="jOH-Ba-zMT" secondAttribute="bottom" constant="32" id="eeM-J7-ZsE"/>
+                        <constraint firstAttribute="bottom" secondItem="CU5-5p-mud" secondAttribute="bottom" constant="32" id="hj7-Fa-IIe"/>
+                        <constraint firstItem="CU5-5p-mud" firstAttribute="width" secondItem="1vL-uw-4Hv" secondAttribute="width" multiplier="0.5" id="qkC-4A-pYA"/>
+                        <constraint firstItem="jOH-Ba-zMT" firstAttribute="centerX" secondItem="1vL-uw-4Hv" secondAttribute="centerX" id="vaF-9M-njP"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="1vL-uw-4Hv" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="20" id="9wg-1F-M8k"/>
+                <constraint firstItem="1vL-uw-4Hv" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" id="Ckh-cF-IlC"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="1vL-uw-4Hv" secondAttribute="trailing" constant="20" id="Q9H-eR-IAd"/>
+                <constraint firstItem="ASl-LV-W1z" firstAttribute="height" secondItem="i5M-Pr-FkT" secondAttribute="height" multiplier="0.5" id="REy-6h-OgY"/>
+            </constraints>
+            <point key="canvasLocation" x="137.68115942028987" y="130.58035714285714"/>
+        </view>
+    </objects>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
