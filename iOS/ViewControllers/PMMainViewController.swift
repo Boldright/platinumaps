@@ -24,8 +24,8 @@ class PMMainViewController: UIViewController {
         case searchFocus = "search.focus"
     }
 
-    @IBOutlet weak var mainWebView: PMWebView!
-    @IBOutlet weak var coverImageView: UIImageView!
+    private weak var mainWebView: PMWebView!
+    private weak var coverImageView: UIImageView!
     
     public var mapSlug: String? = nil
     
@@ -103,6 +103,29 @@ class PMMainViewController: UIViewController {
         if mapSlug?.isEmpty != false {
             fatalError("MapSlug is empty")
         }
+        
+        let webViewConfig = WKWebViewConfiguration()
+        webViewConfig.applicationNameForUserAgent = "Platinumaps/1.0.0"
+        let webView = PMWebView(frame: CGRect.zero, configuration: webViewConfig)
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(webView)
+        NSLayoutConstraint.activate([
+            webView.topAnchor.constraint(equalTo: view.topAnchor),
+            webView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        ])
+        mainWebView = webView;
+        
+        let imageView = UIImageView(frame: view.bounds)
+        view.addSubview(imageView)
+        NSLayoutConstraint.activate([
+            imageView.topAnchor.constraint(equalTo: view.topAnchor),
+            imageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        ])
+        coverImageView = imageView;
         
         if let image = coverImage {
             coverImageView.image = image
@@ -432,16 +455,7 @@ extension PMMainViewController {
             stopLocationRequestIfNoRequest()
             break
         case .stampRallyQrCode:
-            _ = PMQRCodeReaderViewController.requestVideoAccess { [weak self] (granted) in
-                DispatchQueue.main.async {
-                    if (granted) {
-                        self?.openQRCodeReaderVC(command, requestId: requestId)
-                    } else {
-                        self?.showCameraAlert(command: command, requestId: requestId)
-                    }
-                }
-            }
-            return
+            break
         case .browseApp, .browseInApp:
             if let target = queryItems["url"] {
                 var wUrl = URL(string: target)
@@ -540,59 +554,6 @@ extension PMMainViewController {
     private func openSafariViewController(_ url: URL) {
         let vc = SFSafariViewController(url: url)
         present(vc, animated: true, completion: nil)
-    }
-}
-
-extension PMMainViewController: PMQRCodeReaderViewControllerDelegate {
-    private func openQRCodeReaderVC(_ command: PMCommand, requestId: String) {
-        let cameraVC = PMQRCodeReaderViewController()
-        cameraVC.modalPresentationStyle = .overCurrentContext
-        cameraVC.eventDelegate = self
-        cameraVC.safeArea = view.safeAreaInsets
-        cameraVC.command = command
-        cameraVC.requestId = requestId
-        present(cameraVC, animated: true, completion: nil)
-    }
-    
-    private func showCameraAlert(command: PMCommand, requestId: String) {
-        let alertTitle = "確認";
-        let alertMessage = "二次元コードを読み取るにはカメラの使用を許可してください。";
-        let alert = UIAlertController(title: alertTitle, message: alertMessage, preferredStyle: .alert)
-        
-        let okAction = UIAlertAction(title: "OK", style: .default) { (action) in
-            guard let url = URL(string: UIApplication.openSettingsURLString) else {
-                return
-            }
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
-        }
-        alert.addAction(okAction)
-        
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-        alert.addAction(cancelAction)
-        
-        present(alert, animated: true, completion: nil)
-        callbackQRCode(value: nil, command: command, requestId: requestId)
-    }
-    
-    func qrCodeReaderViewController(_ vc: PMQRCodeReaderViewController?, readString value: String?) {
-        guard let command = vc?.command, let requestId = vc?.requestId else {
-            return
-        }
-        callbackQRCode(value: value, command: command, requestId: requestId)
-    }
-    
-    func qrCodeReaderViewControllerClose(_ vc: PMQRCodeReaderViewController) {
-        dismiss(animated: true, completion: nil)
-    }
-    
-    private func callbackQRCode(value: String?, command: PMCommand, requestId: String) {
-        var args: [String: Any] = [:];
-        if value != nil {
-            args["value"] = value
-        } else {
-            args["isCancel"] = true
-        }
-        commandCallback(command, requestId: requestId, args: args)
     }
 }
 
@@ -810,12 +771,6 @@ extension PMMainViewController {
         while true {
             if presentedVC == nil {
                 break
-            }
-            if let targetVC = presentedVC as? PMQRCodeReaderViewController {
-                // QRコードリーダーが表示されていればキャンセルを返す
-                if let command = targetVC.command, let requestId = targetVC.requestId {
-                    commandCallback(command, requestId: requestId, args: ["isCancel": true])
-                }
             }
             presentedVC = presentedVC?.presentedViewController
         }
