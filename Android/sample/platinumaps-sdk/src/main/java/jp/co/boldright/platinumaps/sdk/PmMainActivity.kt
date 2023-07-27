@@ -61,11 +61,6 @@ class PmMainActivity : AppCompatActivity(), LocationListener, OnKeyboardVisibili
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.apply {
-            // ステータスバーの背景を透明にする。
-            decorView.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-        }
         setContentView(R.layout.activity_pm_main)
 
         val mapSlug = intent.getStringExtra(MAP_SLUG)
@@ -105,12 +100,6 @@ class PmMainActivity : AppCompatActivity(), LocationListener, OnKeyboardVisibili
     //region Fragment Bridge
 
     fun getStatusBarHeight(): Int {
-        window?.let {
-            val rect = Rect()
-            it.decorView.getWindowVisibleDisplayFrame(rect)
-            val metrics = resources.displayMetrics
-            return floor(rect.top / metrics.density).toInt()
-        }
         return 0;
     }
 
