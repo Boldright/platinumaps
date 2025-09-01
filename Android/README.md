@@ -4,6 +4,28 @@
 
 -----
 
+### フォルダ構成
+```
+./README.md
+./platinumaps-sdk
+./platinumaps-sdk-release.aar
+./sample
+```
+
+#### README.md
+このファイル
+
+#### platinumaps-sdk
+SDKのプロジェクトフォルダ
+
+#### platinumaps-sdk-release.aar
+SDKライブラリファイル
+
+#### sample
+サンプルプロジェクトフォルダ
+
+----
+
 ### プロジェクト設定
 
 Platinumaps SDKを使用するには、まずアプリの **`AndroidManifest.xml`** ファイルに以下のパーミッションと機能を設定する必要があります。これにより、SDKが通信、位置情報、カメラ、マイクを利用できるようになります。
@@ -26,7 +48,8 @@ Platinumaps SDKを使用するには、まずアプリの **`AndroidManifest.xml
 
 #### 1. SDKの追加
 
-`platinumaps-sdk-release.aar`ファイルをプロジェクトに追加します。具体的な手順については、Android Studioの公式ドキュメント「[Add a library dependency](https://developer.android.com/studio/projects/android-library?hl=ja#psd-add-library-dependency)」を参照してください。
+`platinumaps-sdk-release.aar`ファイルをプロジェクトに追加します。具体的な手順については、Android Studioの公式ドキュメント「[Add a library dependency](https://developer.android.com/studio/projects/android-library?hl=ja#psd-add-library-dependency)」を参照してください。  
+もしくは `platinumaps-sdk` フォルダをプロジェクトに組み込んでください。
 
 #### 2. レイアウトの設定
 
