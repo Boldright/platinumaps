@@ -1,35 +1,41 @@
-package jp.co.boldright.platinumaps.sdk
+package jp.co.boldright.platinumaps
 
-import android.content.Context
-import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.webkit.*
+import android.webkit.CookieManager
+import android.webkit.JsResult
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 
-class PmWebBrowserActivity : AppCompatActivity() {
+class WebBrowserActivity : AppCompatActivity() {
     companion object {
         const val BROWSING_URL = "browsingUrl"
     }
 
-    private var webView: WebView? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_pm_web_browser)
+        setContentView(R.layout.activity_web_browser)
 
         val browsingUrl = intent.getStringExtra(BROWSING_URL)
-        findViewById<WebView>(R.id.pm_web_view)?.let {
+        findViewById<WebView>(R.id.web_view)?.let {
             if (BuildConfig.DEBUG) {
                 WebView.setWebContentsDebuggingEnabled(true)
             }
             // JavaScript を有効
             it.settings.javaScriptEnabled = true;
             // ローカルストレージを有効
-            it.settings.domStorageEnabled = true;
-            val userAgent = "${it.settings.userAgentString} Platinumaps/1.0.0"
-            it.settings.userAgentString = userAgent
-            it.webViewClient = PmWebBrowserView()
+            it.settings.domStorageEnabled = true
+            it.webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): Boolean {
+                    return false
+                }
+            }
             it.webChromeClient = object : WebChromeClient() {
                 override fun onJsAlert(
                     view: WebView?,
@@ -63,33 +69,20 @@ class PmWebBrowserActivity : AppCompatActivity() {
         }
     }
 
-    private fun pmAlertDialog(context: Context): AlertDialog.Builder {
-        return AlertDialog.Builder(context)
-    }
-
     private fun showAlertDialog(message: String?) {
-        val alertDialog = pmAlertDialog(this).setMessage(message)
-        alertDialog.setNeutralButton(R.string.alert_ok) { _, _ -> }
+        val alertDialog = AlertDialog.Builder(this).setMessage(message)
+        alertDialog.setNeutralButton(android.R.string.ok) { _, _ -> }
         alertDialog.show()
     }
 
     private fun showConfirmDialog(message: String?, result: JsResult?) {
-        val alertDialog = pmAlertDialog(this).setMessage(message)
-        alertDialog.setPositiveButton(R.string.alert_ok) { _, _ ->
+        val alertDialog = AlertDialog.Builder(this).setMessage(message)
+        alertDialog.setPositiveButton(android.R.string.ok) { _, _ ->
             result?.confirm()
         }
-        alertDialog.setNegativeButton(R.string.alert_cancel) { _, _ ->
+        alertDialog.setNegativeButton(android.R.string.cancel) { _, _ ->
             result?.cancel()
         }
         alertDialog.show()
-    }
-
-    private class PmWebBrowserView() : WebViewClient() {
-        override fun shouldOverrideUrlLoading(
-            view: WebView?,
-            request: WebResourceRequest?
-        ): Boolean {
-            return super.shouldOverrideUrlLoading(view, request)
-        }
     }
 }
