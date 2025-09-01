@@ -2,7 +2,6 @@ import UIKit
 import WebKit
 import SafariServices
 import CoreLocation
-import PromiseKit
 
 class PMMainViewController: UIViewController {
     
@@ -39,6 +38,8 @@ class PMMainViewController: UIViewController {
     
     public var secretKey: String? = nil
 
+    public var offsetBottom: Int = 0
+
     // Universal Linkから起動される時のURL
     public var launchURL: URL? = nil
 
@@ -72,11 +73,6 @@ class PMMainViewController: UIViewController {
     // この画面が読み込まれた時間
     private let loadAt = Date()
 
-    // WebView の表示位置を調整するか
-    // メイン画面での検索モードは pullable 部品を上段に引き上げる。
-    // iOS12まではこの時に WebView の中身も一緒に引き上がるのでこれを抑制する必要がある。
-    private var shouldFixedWebView: Bool = false;
-
     // location.authorize の requestId
     private var locationAuthorizeRequestId: String? = nil
 
@@ -105,7 +101,9 @@ class PMMainViewController: UIViewController {
         }
         
         let webViewConfig = WKWebViewConfiguration()
-        webViewConfig.applicationNameForUserAgent = "Platinumaps/1.0.0"
+        webViewConfig.applicationNameForUserAgent = "Platinumaps/2.0.0"
+        webViewConfig.allowsInlineMediaPlayback = true
+        webViewConfig.mediaTypesRequiringUserActionForPlayback = .audio
         let webView = PMWebView(frame: CGRect.zero, configuration: webViewConfig)
         webView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(webView)
@@ -117,21 +115,18 @@ class PMMainViewController: UIViewController {
         ])
         mainWebView = webView;
         
-        let imageView = UIImageView(frame: view.bounds)
-        view.addSubview(imageView)
-        NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: view.topAnchor),
-            imageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-        ])
-        coverImageView = imageView;
-        
         if let image = coverImage {
-            coverImageView.image = image
+            let imageView = UIImageView(frame: view.bounds)
+            view.addSubview(imageView)
+            NSLayoutConstraint.activate([
+                imageView.topAnchor.constraint(equalTo: view.topAnchor),
+                imageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            ])
+            imageView.image = image
+            coverImageView = imageView;
         }
-        
-        mainWebView.scrollView.delegate = self
 
         isFirstViewAppear = true
     }
@@ -162,15 +157,20 @@ class PMMainViewController: UIViewController {
             let origin = "https://platinumaps.jp"
             let path = "/maps/\(mapSlug!)"
             var urlComp = URLComponents(string: "\(origin)\(path)")!
+            
+            urlComp.host = "61f986f09aa3.ngrok.app"
 
             var queryItems = [URLQueryItem]();
-            queryItems.append(URLQueryItem(name: "native", value: "1"))
+            queryItems.append(URLQueryItem(name: "native", value: "2"))
             mapQuery.forEach { item in
                 queryItems.append(URLQueryItem(name: item.key, value: item.value))
             }
             // view が表示されてからでないと SafeArea の値は設定されない
             let safeAreaTop = self.view.safeAreaInsets.top
-            let safeAreaBottom = self.view.safeAreaInsets.bottom
+            var safeAreaBottom = self.view.safeAreaInsets.bottom
+            if (offsetBottom > 0) {
+                safeAreaBottom = 0;
+            }
             queryItems.append(URLQueryItem(name: "safearea", value: "\(safeAreaTop),\(safeAreaBottom)"));
             urlComp.queryItems = queryItems;
 
@@ -189,15 +189,6 @@ class PMMainViewController: UIViewController {
                                                    selector: #selector(didEnterBackgroundNotification(_:)),
                                                    name: UIApplication.didEnterBackgroundNotification,
                                                    object: nil)
-
-            NotificationCenter.default.addObserver(self,
-                                                   selector: #selector(keyboardEventNotification(_:)),
-                                                   name: UIApplication.keyboardWillShowNotification,
-                                                   object: nil)
-            NotificationCenter.default.addObserver(self,
-                                                   selector: #selector(keyboardEventNotification(_:)),
-                                                   name: UIApplication.keyboardWillHideNotification,
-                                                   object: nil)
         }
         isFirstViewAppear = false
     }
@@ -210,37 +201,6 @@ class PMMainViewController: UIViewController {
 
     @objc private func didEnterBackgroundNotification(_ notification: Notification) {
         stopLocationRequest()
-    }
-    
-    @objc private func keyboardEventNotification(_ notification: Notification) {
-        if notification.name == UIApplication.keyboardWillShowNotification {
-            var isMainVisible = false
-            if let query = mainWebView.url?.query {
-                do {
-                    // クエリに spot もしくは stamprally が存在している場合、メイン画面の検索バーに触っているはずがないので、スクロール有効にする。
-                    // その他にもスクロール有効にしたい場合があり、今後も発生しそうなので、ews (enable webview scroll）というパラメータを汎用的に使う。
-                    let targetKeys = try NSRegularExpression(pattern: "(spot=|stamprally=|ews=)", options: [.caseInsensitive])
-                    let matches = targetKeys.numberOfMatches(in: query, options: [], range: NSRange(location: 0, length: query.count))
-                    if matches == 0 {
-                        // いずれも含まれていない場合はマップが表示されている
-                        isMainVisible = true
-                    }
-                } catch let error {
-                    dump(error)
-                }
-            }
-            if isMainVisible {
-                if mainWebView.scrollView.isScrollEnabled {
-                    mainWebView.scrollView.isScrollEnabled = false
-                }
-                shouldFixedWebView = isMainVisible
-            }
-        } else if notification.name == UIApplication.keyboardWillHideNotification {
-            shouldFixedWebView = false
-            if !mainWebView.scrollView.isScrollEnabled {
-                mainWebView.scrollView.isScrollEnabled = true
-            }
-        }
     }
 
     override func present(_ viewControllerToPresent: UIViewController, animated flag: Bool, completion: (() -> Void)? = nil) {
@@ -272,7 +232,6 @@ extension PMMainViewController: WKUIDelegate {
     }
     
     func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
-        
         let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
         let okAction = UIAlertAction(title: "OK", style: .default) { (_) in
             completionHandler(true)
@@ -384,14 +343,6 @@ extension PMMainViewController: WKNavigationDelegate {
     }
 }
 
-extension PMMainViewController: UIScrollViewDelegate {
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if shouldFixedWebView {
-            scrollView.setContentOffset(.zero, animated: false)
-        }
-    }
-}
-
 extension PMMainViewController {
     private func runCommand(commandUrl: URLComponents) {
         guard let command = PMCommand(rawValue: commandUrl.host ?? "") else {
@@ -410,6 +361,7 @@ extension PMMainViewController {
             if let secretKey = secretKey, !secretKey.isEmpty {
                 args["secretKey"] = secretKey
             }
+            args["offsetBottom"] = offsetBottom;
             commandCallback(command, requestId: requestId, args: args)
         case .webReady:
             isWebViewLoading = false
@@ -459,14 +411,15 @@ extension PMMainViewController {
         case .browseApp, .browseInApp:
             if let target = queryItems["url"] {
                 var wUrl = URL(string: target)
-                if wUrl?.host == nil {
+                if wUrl?.scheme == nil {
                     // ホストが指定されていない場合はページパス以降が指定されているので
                     // mainWebView に設定した同じドメインのページを表示する
                     wUrl = URL(string: target, relativeTo: originalUrl.url)?.absoluteURL
                 }
 
                 if let url = wUrl {
-                    if command == .browseApp {
+                    if command == .browseApp
+                        || (url.scheme != "https" && url.scheme != "http") {
                         if UIApplication.shared.canOpenURL(url) {
                             UIApplication.shared.open(url, options: [:], completionHandler: nil)
                         }
@@ -494,59 +447,73 @@ extension PMMainViewController {
             }
             break
         case .searchFocus:
-            shouldFixedWebView = true
             break
         }
         commandCallback(command, requestId: requestId, args: [:])
     }
-    
-    private func commandCallback(_ command: PMCommand, requestId: String, args: [String: Any]) {
+
+    private func commandCallbackAsync(_ command: PMCommand, requestId: String, args: [String: Any], completion: ((Any?, Error?) -> Void)? = nil) {
         do {
             let jsonDate = try JSONSerialization.data(withJSONObject: args, options: [])
-            guard let jsonString = String(data: jsonDate, encoding: .utf8) else {
+            if let jsonString = String(data: jsonDate, encoding: .utf8) {
+                mainWebView.evaluateJavaScript("commandCallback('\(command.rawValue)', '\(requestId)', \(jsonString))", completionHandler: {value, error in
+                    completion?(value, error)
+                })
                 return
             }
-            mainWebView.evaluateJavaScript("commandCallback('\(command.rawValue)', '\(requestId)', \(jsonString))", completionHandler: nil)
         } catch {
             dump(error)
         }
+        completion?(nil, nil as Error?)
+    }
+
+    private func commandCallback(_ command: PMCommand, requestId: String, args: [String: Any]) {
+        commandCallbackAsync(command, requestId: requestId, args: args)
     }
 
     private func showCoverImageView(_ completion: (() -> Void)? = nil) {
-        view.bringSubviewToFront(coverImageView)
+        if let coverImageView = self.coverImageView {
+            view.bringSubviewToFront(coverImageView)
 
-        if 0 < coverImageView.alpha {
-            completion?()
-            return
-        }
+            if 0 < coverImageView.alpha {
+                completion?()
+                return
+            }
 
-        UIView.animate(withDuration: 0.3) { [weak self] in
-            self?.coverImageView.alpha = 1.0
-        } completion: { finished in
+            UIView.animate(withDuration: 0.3) { [weak self] in
+                self?.coverImageView?.alpha = 1.0
+            } completion: { finished in
+                completion?()
+            }
+        } else {
             completion?()
         }
     }
 
     private func hideCoverImageView(_ completion: (() -> Void)? = nil) {
-        if coverImageView.alpha != 1 {
-            completion?()
-            return
-        }
-        
-        let limitSeconds = 1.0
-        var delay = Date().timeIntervalSince(loadAt)
-        if limitSeconds < delay {
-            delay = 0
-        } else {
-            delay = limitSeconds - delay
-        }
-        
-        UIView.animate(withDuration: 0.3, delay: delay) { [weak self] in
-            self?.coverImageView.alpha = 0.0
-        } completion: { [weak self] finished in
-            if let imageView = self?.coverImageView {
-                self?.view.sendSubviewToBack(imageView)
+        if let coverImageView = self.coverImageView {
+            if coverImageView.alpha != 1 {
+                completion?()
+                return
             }
+            
+            let limitSeconds = 1.0
+            var delay = Date().timeIntervalSince(loadAt)
+            if limitSeconds < delay {
+                delay = 0
+            } else {
+                delay = limitSeconds - delay
+            }
+            
+            UIView.animate(withDuration: 0.3, delay: delay) { [weak self] in
+                self?.coverImageView?.alpha = 0.0
+            } completion: { [weak self] finished in
+                if let imageView = self?.coverImageView {
+                    self?.view.sendSubviewToBack(imageView)
+                }
+                completion?()
+            }
+        } else {
             completion?()
         }
     }
@@ -723,33 +690,37 @@ extension PMMainViewController: CLLocationManagerDelegate {
         let status = locationAuthorizationStatus()
         args["status"] = locationAuthorizationStatusText(status)
 
-        var callbacks = locationOnceRequestIds.map { id in
-            return Promise<String> { [weak self] resolver in
-                self?.commandCallback(.locationOnce, requestId: id, args: args)
-                resolver.fulfill(id)
+        // 全てのリクエストを格納する配列
+        var allRequestIds = locationOnceRequestIds
+        allRequestIds.append(contentsOf: locationWatchRequestIds)
+        
+        // 全てのリクエストが完了するのを待つためのDispatchGroupを作成
+        let group = DispatchGroup()
+
+        for id in allRequestIds {
+            group.enter() // 非同期処理を開始する前にグループに入る
+            
+            let command: PMCommand = locationOnceRequestIds.contains(id) ? .locationOnce : .locationWatch
+            
+            self.commandCallbackAsync(command, requestId: id, args: args) { value, error in
+                if let error = error {
+                    print("commandCallbackAsync Error: \(error)")
+                }
+                group.leave() // 非同期処理が完了したらグループから出る
             }
         }
-
-        let watchCallbacks = locationWatchRequestIds.map { id in
-            return Promise<String> { [weak self] resolver in
-                self?.commandCallback(.locationWatch, requestId: id, args: args)
-                resolver.fulfill(id)
-            }
+        
+        // 全てのリクエストが完了した後の処理
+        group.notify(queue: .main) {
+            // PromiseKit.when(resolved:)で実行されていた後続処理
+            self.locationOnceRequestIds.removeAll()
+            self.stopLocationRequestIfNoRequest()
         }
-        callbacks.append(contentsOf: watchCallbacks)
-
-        if !callbacks.isEmpty {
-            _ = PromiseKit.when(resolved: callbacks)
-        }
-
-        locationOnceRequestIds.removeAll()
-        stopLocationRequestIfNoRequest()
     }
 }
 
 // MARK: Push
 extension PMMainViewController {
-    
     func pushLaunchURL(_ url: URL) {
         guard hasWebReady else {
             self.launchURL = url
@@ -782,8 +753,8 @@ extension PMMainViewController {
     /// Web 側にコマンドを送る。
     private func commandPush(_ command: String, args: [String: Any]) {
         do {
-            let jsonDate = try JSONSerialization.data(withJSONObject: args, options: [])
-            guard let jsonString = String(data: jsonDate, encoding: .utf8) else {
+            let jsonData = try JSONSerialization.data(withJSONObject: args, options: [])
+            guard let jsonString = String(data: jsonData, encoding: .utf8) else {
                 return
             }
 
