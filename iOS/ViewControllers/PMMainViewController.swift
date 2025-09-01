@@ -157,8 +157,6 @@ class PMMainViewController: UIViewController {
             let origin = "https://platinumaps.jp"
             let path = "/maps/\(mapSlug!)"
             var urlComp = URLComponents(string: "\(origin)\(path)")!
-            
-            urlComp.host = "61f986f09aa3.ngrok.app"
 
             var queryItems = [URLQueryItem]();
             queryItems.append(URLQueryItem(name: "native", value: "2"))
