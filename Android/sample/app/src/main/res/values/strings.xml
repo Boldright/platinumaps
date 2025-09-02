@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Platinumaps</string>
-    <string name="button_open">Open</string>
+    <string name="app_name">PlatinumapsSDK</string>
+    <string name="button_open">Open Map</string>
     <string name="title_activity_web_view">WebViewActivity</string>
 </resources>

@@ -1,0 +1,20 @@
+<resources>
+    <string name="splash_image_description">启动</string>
+
+    <string name="qr_code_reader_message">请将相机对准二维码。</string>
+
+    <string name="button_text_cancel">取消</string>
+
+    <string name="dialog_title_camera_permission">确认</string>
+    <string name="dialog_message_camera_permission">请允许使用相机以扫描二维码。</string>
+
+    <string name="dialog_title_location_permission">确认</string>
+    <string name="dialog_message_location_permission">此功能需要使用位置信息。请允许使用位置信息。</string>
+
+    <string name="alert_ok">确定</string>
+    <string name="alert_cancel">取消</string>
+    <string name="alert_yes">是</string>
+    <string name="alert_no">否</string>
+    <string name="alert_login">登录</string>
+    <string name="alert_settings">设置</string>
+</resources>

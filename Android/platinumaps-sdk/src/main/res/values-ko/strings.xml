@@ -1,0 +1,20 @@
+<resources>
+    <string name="splash_image_description">시작</string>
+
+    <string name="qr_code_reader_message">카메라를 QR 코드에 맞추세요.</string>
+
+    <string name="button_text_cancel">취소</string>
+
+    <string name="dialog_title_camera_permission">확인</string>
+    <string name="dialog_message_camera_permission">QR 코드를 스캔하려면 카메라 사용을 허용하세요.</string>
+
+    <string name="dialog_title_location_permission">확인</string>
+    <string name="dialog_message_location_permission">이 기능은 위치 정보를 사용합니다. 위치 정보 사용을 허용하세요.</string>
+
+    <string name="alert_ok">확인</string>
+    <string name="alert_cancel">취소</string>
+    <string name="alert_yes">예</string>
+    <string name="alert_no">아니요</string>
+    <string name="alert_login">로그인</string>
+    <string name="alert_settings">설정</string>
+</resources>

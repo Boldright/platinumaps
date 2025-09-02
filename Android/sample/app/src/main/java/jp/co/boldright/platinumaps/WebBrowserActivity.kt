@@ -21,12 +21,7 @@ class WebBrowserActivity : AppCompatActivity() {
 
         val browsingUrl = intent.getStringExtra(BROWSING_URL)
         findViewById<WebView>(R.id.web_view)?.let {
-            if (BuildConfig.DEBUG) {
-                WebView.setWebContentsDebuggingEnabled(true)
-            }
-            // JavaScript を有効
             it.settings.javaScriptEnabled = true;
-            // ローカルストレージを有効
             it.settings.domStorageEnabled = true
             it.webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(

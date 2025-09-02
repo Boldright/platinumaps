@@ -3,10 +3,11 @@ package jp.co.boldright.platinumaps
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import jp.co.boldright.platinumaps.sdk.PmMapBeaconOptions
+import jp.co.boldright.platinumaps.sdk.PmMapOptions
 import jp.co.boldright.platinumaps.sdk.PmWebView
 
 class WebViewActivity : AppCompatActivity(), PmWebView.OnOpenLinkListener {
@@ -15,15 +16,22 @@ class WebViewActivity : AppCompatActivity(), PmWebView.OnOpenLinkListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_web_view)
         webView = findViewById(R.id.pm_sdk_web_view)
         webView.onOpenLinkListener = this
         webView.openPlatinumaps(
-            "__dev_sr_comb__",
-            "preview=bed7ddb0-2643-4d6b-9292-8fa636f7fbb0",
-            0,
-            0,
+            PmMapOptions(
+                mapPath = "demo",
+                queryParams = mapOf("key1" to "valueA", "key2" to "value2"),
+                safeAreaTop = 0,
+                safeAreaBottom = 0,
+                beacon = PmMapBeaconOptions(
+                    uuid = "XXX-XXX",
+                    minSample = 5,
+                    maxHistory = 5,
+                    memo = "動作確認",
+                )
+            )
         )
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.web_view_main)) { v, insets ->
@@ -33,14 +41,35 @@ class WebViewActivity : AppCompatActivity(), PmWebView.OnOpenLinkListener {
         }
     }
 
+    override fun onPause() {
+        webView.activityPause()
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        webView.activityResume()
+    }
+
+    override fun onDestroy() {
+        webView.activityDestroy()
+        super.onDestroy()
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        // ライブラリのメソッドを呼び出してパーミッション結果を処理させる
         webView.handlePermissionResult(requestCode, grantResults)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PmWebView.FILE_CHOOSER_REQUEST_CODE) {
+            webView.handleFileChooserResult(requestCode, resultCode, data)
+        }
     }
 
     override fun onOpenLink(url: Uri, sharedCookie: Boolean) {

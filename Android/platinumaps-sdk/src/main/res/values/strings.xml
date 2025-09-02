@@ -1,6 +1,20 @@
 <resources>
-    <string name="dialog_title_reload">確認</string>
-    <string name="dialog_message_reload">データの読み込みに失敗しました。\nリロードをお願いします。</string>
-    <string name="dialog_message_not_found">指定されたマップにアクセスできません。</string>
-    <string name="alert_reload">リロード</string>
+    <string name="splash_image_description">Launch</string>
+
+    <string name="qr_code_reader_message">Please point the camera at the QR code.</string>
+
+    <string name="button_text_cancel">Cancel</string>
+
+    <string name="dialog_title_camera_permission">Permission Required</string>
+    <string name="dialog_message_camera_permission">Please allow camera access to scan the QR code.</string>
+
+    <string name="dialog_title_location_permission">Permission Required</string>
+    <string name="dialog_message_location_permission">Please allow location access to use current location feature.</string>
+
+    <string name="alert_ok">OK</string>
+    <string name="alert_cancel">Cancel</string>
+    <string name="alert_yes">Yes</string>
+    <string name="alert_no">No</string>
+    <string name="alert_login">Sign in</string>
+    <string name="alert_settings">Settings</string>
 </resources>

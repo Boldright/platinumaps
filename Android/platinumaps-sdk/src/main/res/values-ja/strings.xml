@@ -1,0 +1,20 @@
+<resources>
+    <string name="splash_image_description">Launch</string>
+
+    <string name="qr_code_reader_message">カメラを二次元コードに\n向けてください。</string>
+
+    <string name="button_text_cancel">キャンセル</string>
+
+    <string name="dialog_title_camera_permission">確認</string>
+    <string name="dialog_message_camera_permission">QRコードを読み取るにはカメラの使用を許可してください。</string>
+
+    <string name="dialog_title_location_permission">確認</string>
+    <string name="dialog_message_location_permission">この機能は位置情報を利用します。位置情報の利用を許可してください。</string>
+
+    <string name="alert_ok">OK</string>
+    <string name="alert_cancel">キャンセル</string>
+    <string name="alert_yes">はい</string>
+    <string name="alert_no">いいえ</string>
+    <string name="alert_login">ログイン</string>
+    <string name="alert_settings">設定</string>
+</resources>
