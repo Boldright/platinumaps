@@ -1,10 +1,11 @@
-### 🗺️ Platinumaps Android SDK 組み込み手順書
+### Platinumaps Android SDK Integration Guide
 
-このドキュメントでは、Platinumaps SDKをAndroidアプリケーションに組み込む手順を説明します。
+This document explains the procedure for integrating the Platinumaps SDK into an Android application.
 
 -----
 
-### フォルダ構成
+### Directory Structure
+
 ```
 ./README.md
 ./platinumaps-sdk
@@ -13,47 +14,54 @@
 ```
 
 #### README.md
-このファイル
+
+This file
 
 #### platinumaps-sdk
-SDKのプロジェクトフォルダ
+
+The SDK's project folder
 
 #### platinumaps-sdk-release.aar
-SDKライブラリファイル
+
+The SDK library file
 
 #### sample
-サンプルプロジェクトフォルダ
 
-----
-
-### プロジェクト設定
-
-Platinumaps SDKを使用するには、まずアプリの **`AndroidManifest.xml`** ファイルに以下のパーミッションと機能を設定する必要があります。これにより、SDKが通信、位置情報、カメラ、マイクを利用できるようになります。
-
-```xml
-<uses-permission android:name="android.permission.INTERNET" />
-<uses-permission android:name="android.permission.CAMERA" />
-<uses-permission android:name="android.permission.RECORD_AUDIO" />
-<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
-<uses-feature android:name="android.hardware.camera" />
-<uses-feature android:name="android.hardware.camera.autofocus" />
-```
+The sample project folder
 
 -----
 
-### 組み込み手順
+### Project Setup
 
-#### 1. SDKの追加
+To use the Platinumaps SDK, you first need to configure the following permissions and features in your app's **`AndroidManifest.xml`** file.
 
-`platinumaps-sdk-release.aar`ファイルをプロジェクトに追加します。具体的な手順については、Android Studioの公式ドキュメント「[Add a library dependency](https://developer.android.com/studio/projects/android-library?hl=ja#psd-add-library-dependency)」を参照してください。  
-もしくは `platinumaps-sdk` フォルダをプロジェクトに組み込んでください。
+```xml
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-#### 2. レイアウトの設定
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-マップを表示したいActivityのレイアウトファイルに **`PmWebView`** コンポーネントを追加します。このコンポーネントが、マップの表示領域となります。
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-permission android:name="android.permission.RECORD_AUDIO" />
+<uses-feature android:name="android.hardware.camera" android:required="false" />
+<uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+```
+
+**Note**: Setting the `android:required` attribute in `uses-feature` to `false` allows your app to be installed on devices that do not have camera hardware.
+
+-----
+
+### Integration Steps
+
+#### 1\. Add the SDK
+
+Add the `platinumaps-sdk-release.aar` file to your project. For specific instructions, please refer to the official Android Studio documentation: "[Add a library dependency](https://www.google.com/search?q=https://developer.android.com/studio/projects/android-library%3Fhl%3Den%23psd-add-library-dependency)".
+Alternatively, you can include the `platinumaps-sdk` folder in your project as a module.
+
+#### 2\. Set up the Layout
+
+Add the **`PmWebView`** component to the layout file of the Activity where you want to display the map.
 
 **`layout/activity_web_view.xml`**
 
@@ -80,20 +88,23 @@ Platinumaps SDKを使用するには、まずアプリの **`AndroidManifest.xml
 </androidx.constraintlayout.widget.ConstraintLayout>
 ```
 
-#### 3. Activityへの実装
+#### 3\. Implement in your Activity
 
-レイアウトファイルに対応するKotlinファイルに、 **`PmWebView`** コンポーネントを初期化し、マップを表示するためのロジックを実装します。
+In the corresponding Activity class, initialize the **`PmWebView`** component and implement the logic to integrate the SDK's features.
 
 **`WebViewActivity.kt`**
 
 ```kotlin
+package jp.co.boldright.platinumaps
+
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import jp.co.boldright.platinumaps.sdk.PmMapBeaconOptions
+import jp.co.boldright.platinumaps.sdk.PmMapOptions
 import jp.co.boldright.platinumaps.sdk.PmWebView
 
 class WebViewActivity : AppCompatActivity(), PmWebView.OnOpenLinkListener {
@@ -102,15 +113,24 @@ class WebViewActivity : AppCompatActivity(), PmWebView.OnOpenLinkListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_web_view)
         webView = findViewById(R.id.pm_sdk_web_view)
         webView.onOpenLinkListener = this
+
+        // Configure the map display settings using PmMapOptions
         webView.openPlatinumaps(
-            "demo", // 表示したいマップのURL文字列を指定してください
-            "key1=value1&key2=value2", // 表示したいマップのクエリパラメータを指定してください
-            0, // 全画面表示する場合に端末上部のノッチ領域などの高さを指定してください
-            0, // 全画面表示する場合に端末下部のアクションバーなどの高さを指定してください
+            PmMapOptions(
+                mapPath = "demo", // Specify the path of the map to display
+                queryParams = mapOf("key1" to "valueA", "key2" to "value2"), // Specify query parameters as a Map
+                safeAreaTop = 0,    // Height of the top safe area (e.g., notch) for full-screen displays
+                safeAreaBottom = 0, // Height of the bottom safe area (e.g., navigation bar) for full-screen displays
+                beacon = PmMapBeaconOptions( // Settings for using beacons
+                    uuid = "B9407F30-F5F8-466E-AFF9-25556B57FE6D", // Target beacon UUID
+                    minSample = 5,
+                    maxHistory = 5,
+                    memo = "Operation check",
+                )
+            )
         )
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.web_view_main)) { v, insets ->
@@ -120,25 +140,52 @@ class WebViewActivity : AppCompatActivity(), PmWebView.OnOpenLinkListener {
         }
     }
 
+    // Link the Activity's lifecycle with the SDK
+    override fun onPause() {
+        webView.activityPause()
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        webView.activityResume()
+    }
+
+    override fun onDestroy() {
+        webView.activityDestroy()
+        super.onDestroy()
+    }
+
+    // Pass the permission request result to the SDK
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        // SDKのメソッドを呼び出してパーミッション結果を処理させる
         webView.handlePermissionResult(requestCode, grantResults)
     }
 
+    // Pass the file chooser result to the SDK
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        // Handle the result from the intent started by onShowFileChooser
+        if (requestCode == PmWebView.FILE_CHOOSER_REQUEST_CODE) {
+            webView.handleFileChooserResult(requestCode, resultCode, data)
+        }
+    }
+
+    // Handle link clicks within the map
     override fun onOpenLink(url: Uri, sharedCookie: Boolean) {
         if (sharedCookie) {
-            // スタンプラリーのダウンロード特典や外部リンク特典などユーザー情報を引き継ぐ必要がある場合に
-            // sharedCookie=true でイベントが呼ばれますのでアプリ内ブラウザで表示するようにしてください
+            // This is called with sharedCookie=true when user information needs to be carried over,
+            // such as for stamp rally download rewards. Please display in an in-app browser.
             val intent = Intent(this@WebViewActivity, WebBrowserActivity::class.java)
             intent.putExtra(WebBrowserActivity.BROWSING_URL, url.toString())
             startActivity(intent)
             return
         }
+        // Open other regular links in an external browser
         val intent = Intent(Intent.ACTION_VIEW, url)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
@@ -146,10 +193,12 @@ class WebViewActivity : AppCompatActivity(), PmWebView.OnOpenLinkListener {
 }
 ```
 
-このコードでは、以下の処理を行っています。
+This code performs the following integrations:
 
-  * **`onCreate`**: `PmWebView`を初期化し、 **`onOpenLinkListener`**を設定した後、**`openPlatinumaps`** メソッドを呼び出してマップを表示します。
-  * **`onRequestPermissionsResult`**: ユーザーがパーミッションを許可または拒否した結果を、SDKの **`handlePermissionResult`** メソッドに渡します。
-  * **`onOpenLink`**: マップ内のリンクがタップされた際に呼び出されます。 **`sharedCookie`** が`true`の場合はユーザー情報を引き継いでアプリ内ブラウザで開き、それ以外の場合は外部ブラウザで開くように実装されています。
+  * **`onCreate`**: Initializes `PmWebView` and calls the **`openPlatinumaps`** method using a **`PmMapOptions`** object to specify the map path, query parameters, and beacon settings.
+  * **Lifecycle Integration**: Calls the corresponding SDK methods (`activityPause`, `activityResume`, `activityDestroy`) in `onPause`, `onResume`, and `onDestroy`. This ensures that location and beacon scanning are properly stopped and resumed when the app moves to the background, managing resources efficiently.
+  * **`onRequestPermissionsResult`**: Passes the result of a user's permission decision (e.g., for location) to the SDK's **`handlePermissionResult`** method.
+  * **`onActivityResult`**: Passes the result of a user's file selection from a file chooser dialog to the SDK's **`handleFileChooserResult`** method.
+  * **`onOpenLink`**: Called when a link within the map is tapped. If **`sharedCookie`** is `true`, it opens the link in an in-app browser because user information needs to be preserved. Otherwise, it is opened in an external browser.
 
-この手順に従うことで、AndroidアプリケーションにPlatinumapsの地図機能を簡単に組み込むことができます。
+By following these steps, you can easily integrate the Platinumaps map functionality into your Android application.
