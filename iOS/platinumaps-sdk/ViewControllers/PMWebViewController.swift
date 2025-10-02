@@ -21,7 +21,7 @@ class PMWebViewController: UIViewController {
         ])
         
         if let nb = navigationController {
-            let doneItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(onTapDone))
+            let doneItem = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(onTapDone))
             nb.navigationBar.topItem?.leftBarButtonItem = doneItem
         }
 
