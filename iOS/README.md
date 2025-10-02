@@ -60,3 +60,39 @@ vc.mapQuery["key2"] = "value2"
   * `beaconUuid`
     Optional  
     If you are using indoor positioning with beacons, please set the UUID of the target beacon to be scanned (in hyphenated format).
+
+### Handling Links
+
+To handle links yourself, please set the delegate as shown below to ensure links are processed.
+
+```swift
+import UIKit
+import SafariServices
+
+class ViewController: UIViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view.
+    }
+
+    @IBAction func openPlatinumaps(_ sender: Any) {
+        let vc = WebPageViewController()
+        let nc = UINavigationController(rootViewController: vc)
+        present(nc, animated: true)
+    }
+}
+
+extension ViewController: PMMainViewControllerDelegate {
+    func openLink(_ url: URL, sharedCookie: Bool) {
+        if sharedCookie {
+            // Please display in the in-app browser as it is necessary to carry over user information for things like stamp rally rewards.
+        } else {
+            // It can be displayed in SFSafariViewController or the standard browser.
+            if let nav = navigationController {
+                let vc = SFSafariViewController(url: url)
+                nav.present(vc, animated: true, completion: nil)
+            }
+        }
+    }
+}
+```

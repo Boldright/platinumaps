@@ -3,6 +3,10 @@ import WebKit
 import SafariServices
 import CoreLocation
 
+protocol PMMainViewControllerDelegate: AnyObject {
+    func openLink(_ url: URL, sharedCookie: Bool)
+}
+
 class PMMainViewController: UIViewController {
     
     // クラス内にエラーenumをネストして定義
@@ -37,6 +41,8 @@ class PMMainViewController: UIViewController {
     
     private weak var mainWebView: PMWebView!
     private weak var coverImageView: UIImageView!
+    
+    public weak var delegate: PMMainViewControllerDelegate?
     
     /// 表示対象のマップの「URL用文字列」を設定してください。
     public var mapSlug: String? = nil
@@ -531,6 +537,10 @@ extension PMMainViewController {
                 }
                 
                 if let url = wUrl {
+                    if let _ = delegate {
+                        delegate?.openLink(url, sharedCookie: queryItems["sharedCookie"] == "true")
+                        return
+                    }
                     if command == .browseApp
                         || (url.scheme != "https" && url.scheme != "http") {
                         if UIApplication.shared.canOpenURL(url) {
@@ -634,8 +644,12 @@ extension PMMainViewController {
     }
     
     private func openSafariViewController(_ url: URL) {
-        let vc = SFSafariViewController(url: url)
-        present(vc, animated: true, completion: nil)
+        if let _ = delegate {
+            delegate?.openLink(url, sharedCookie: false)
+        } else {
+            let vc = SFSafariViewController(url: url)
+            present(vc, animated: true, completion: nil)
+        }
     }
 }
 
