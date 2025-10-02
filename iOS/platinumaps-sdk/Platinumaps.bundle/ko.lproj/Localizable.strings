@@ -1,0 +1,6 @@
+"PMDeniedTitle" = "확인";
+"PMDeniedMessage" = "이 기능은 위치 정보를 사용합니다. 설정을 열어 앱에 위치 정보 사용을 허용해주세요.";
+"PMDeniedOk" = "설정 열기";
+"PMDeniedCancel" = "취소";
+"PMRestrictedTitle" = "위치 정보를 사용할 수 없습니다";
+"PMRestrictedMessage" = "이 장치에서는 위치 정보 사용이 제한되어 있어, 위치 정보를 사용할 수 없습니다.";

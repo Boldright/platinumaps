@@ -1,0 +1,6 @@
+"PMDeniedTitle" = "确认";
+"PMDeniedMessage" = "此功能需要使用位置信息。请打开设置，允许应用访问您的位置信息。";
+"PMDeniedOk" = "打开设置";
+"PMDeniedCancel" = "取消";
+"PMRestrictedTitle" = "无法使用位置信息";
+"PMRestrictedMessage" = "此设备的位置信息使用已被限制，无法使用位置信息功能。";

@@ -1,32 +1,48 @@
-# Platinumaps 組込手順書(iOS)
+# Platinumaps Integration Guide (iOS)
 
-## フォルダー構成
+## Folder Structure
+
 ```
 ./README.md
-./ViewControllers
-./ViewControllers/PMWebViewController.swift
-./ViewControllers/PMMainViewController.swift
-./Views
-./Views/PMWebView.swift
+./platinumaps-sdk
+./platinumaps-sdk/Errors
+./platinumaps-sdk/Errors/PMError.swift
+./platinumaps-sdk/Types
+./platinumaps-sdk/Types/PMLocale.swift
+./platinumaps-sdk/ViewControllers
+./platinumaps-sdk/ViewControllers/PMWebViewController.swift
+./platinumaps-sdk/ViewControllers/PMMainViewController.swift
+./platinumaps-sdk/Views
+./platinumaps-sdk/Views/PMWebView.swift
+./platinumaps-sdk/Platinumaps.bundle
 ```
 
 ### README.md
-このファイル
+
+This file.
 
 ### PMMainViewController.swift
-メイン画面
+
+Main screen.
 
 ### PMWebViewController.swift
-アプリ内ブラウザ画面
+
+In-app browser screen.
 
 ### PMWebView.swift
-ウェブブラウザ部品
-SafeArea 領域まで表示するためのものです。
 
-## 組込手順
-1. 位置情報やカメラ、マイクを利用しますので、これらが利用可能となるようにプロジェクトを設定してください。
-2. `/Platinumaps` ごとプロジェクトに追加してください。
-3. 以下のように `PMMainViewController` に対して必要な情報を設定してください。
+Web browser component.
+This is for displaying content that extends to the SafeArea area.
+
+### Platinumaps.bundle
+
+Contains localization files used exclusively by the SDK.
+
+## Integration Steps
+
+1.  This SDK uses location information, the camera, and the microphone. Please configure your project to enable these features.
+2.  Add the entire `/platinumaps-sdk` directory to your project.
+3.  Set the required information for `PMMainViewController` as follows.
 
 ```swift
 let vc = PMMainViewController()
@@ -36,8 +52,11 @@ vc.mapQuery["key2"] = "value2"
 ```
 
   * `mapSlug`  
-    必須項目  
-    URL用文字列を設定してください。
+    Required  
+    Please set the string for the URL.
   * `mapQuery`  
-    任意項目  
-    クエリパラメータをディクショナリー形式で設定してください。
+    Optional  
+    Please set the query parameters in a dictionary format.
+  * `beaconUuid`
+    Optional  
+    If you are using indoor positioning with beacons, please set the UUID of the target beacon to be scanned (in hyphenated format).
