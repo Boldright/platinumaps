@@ -80,9 +80,19 @@ class PMMainViewController: UIViewController {
         if _locationManager == nil {
             _locationManager = CLLocationManager()
             _locationManager?.delegate = self
+            if #available(iOS 14.0, *) {
+                self.currentAuthorizationStatus = _locationManager!.authorizationStatus
+            } else {
+                self.currentAuthorizationStatus = CLLocationManager.authorizationStatus()
+            }
         }
         return _locationManager!
     }
+    
+    private var isLocationServicesEnabled = false
+
+    private var currentAuthorizationStatus: CLAuthorizationStatus = .notDetermined
+
     private var isMeasuringLocation = false
     
     private var originalUrl = URLComponents()
@@ -115,7 +125,7 @@ class PMMainViewController: UIViewController {
     
     /// 位置情報が制限された時のダイアログを表示中かどうか（locationとbeaconで同じダイアログを表示しようとするため、スキップ制御したい）
     private var isAlertPresentedForLocationRestricted = false
-    
+
     // MARK: Beacon Members
     /// 屋内測位に利用する、スキャン対象ビーコンのUUIDを設定してください。
     var beaconUuid: String?
@@ -220,6 +230,16 @@ class PMMainViewController: UIViewController {
         
         locationManager.delegate = self
         initBeaconIfNeeded()
+        
+        DispatchQueue.global().async { [weak self] in
+            guard let self = self else { return }
+            if CLLocationManager.locationServicesEnabled() {
+                self.isLocationServicesEnabled = true
+                self.currentAuthorizationStatus = self.locationManager.authorizationStatus
+            } else {
+                self.currentAuthorizationStatus = .denied
+            }
+        }
     }
     
     @objc private func reloadWebView(_ sender: Any?) {
@@ -657,11 +677,11 @@ extension PMMainViewController {
 extension PMMainViewController: CLLocationManagerDelegate {
     /// 現在の権限状態を取得する。※バックグラウンドスレッドから実行すること
     private func _locationAuthorizationStatusInBackground() -> CLAuthorizationStatus {
-        if CLLocationManager.locationServicesEnabled() {
+        if isLocationServicesEnabled {
             guard #available(iOS 14.0, *) else {
                 return CLLocationManager.authorizationStatus()
             }
-            return locationManager.authorizationStatus;
+            return currentAuthorizationStatus
         }
         return .denied
     }
@@ -709,7 +729,7 @@ extension PMMainViewController: CLLocationManagerDelegate {
     
     private func startLocationRequest(isOnce: Bool, isSilent: Bool) async throws {
         let status = try await locationAuthorizationStatusAsync()
-        
+
         switch status {
         case .notDetermined:
             await locationRequestWhenInUseAuthorization()
@@ -843,7 +863,10 @@ extension PMMainViewController: CLLocationManagerDelegate {
         isMeasuringLocation = false
     }
     
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        let status = manager.authorizationStatus
+        self.currentAuthorizationStatus = status
+
         if !locationOnceRequestIds.isEmpty || !locationWatchRequestIds.isEmpty {
             // 位置情報を要求するコマンドを受け取っていれば位置情報を取得する
             switch status {
