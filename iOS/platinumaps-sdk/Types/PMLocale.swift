@@ -1,6 +1,6 @@
 import Foundation
 
-enum PMLocale : String {
+enum PMLocale: String, Sendable {
     /// 日本語
     case ja = "ja"
     

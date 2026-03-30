@@ -1,5 +1,15 @@
 # Platinumaps Integration Guide (iOS)
 
+## Requirements
+
+- Swift 6.0+
+- Xcode 16.0+
+- iOS 16.0+
+
+## Installation
+
+Copy the entire `/platinumaps-sdk` directory into your Xcode project.
+
 ## Folder Structure
 
 ```

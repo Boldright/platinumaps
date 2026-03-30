@@ -1,6 +1,6 @@
 import Foundation
 
-enum PMError: Error {
+enum PMError: Error, Sendable {
     /// 定形外
     case dynamic(reason: String)
     
