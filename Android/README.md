@@ -202,3 +202,13 @@ This code performs the following integrations:
   * **`onOpenLink`**: Called when a link within the map is tapped. If **`sharedCookie`** is `true`, it opens the link in an in-app browser because user information needs to be preserved. Otherwise, it is opened in an external browser.
 
 By following these steps, you can easily integrate the Platinumaps map functionality into your Android application.
+
+-----
+
+### Notes on Android 16 (API level 36)
+
+The SDK is built and tested against `targetSdk 36`. When the host application also targets API level 36, please be aware of the following platform behavior changes. The SDK itself does not require any code changes, but the host application is responsible for handling them:
+
+* **Edge-to-edge enforcement**: On Android 16, edge-to-edge display is enforced for apps targeting API level 36 and the legacy opt-out is no longer effective. Apply window insets to the layout that contains `PmWebView` so that the map UI is not obscured by the system bars. The sample `WebViewActivity` above demonstrates this with `ViewCompat.setOnApplyWindowInsetsListener`.
+* **Predictive back gesture**: If the host application overrides `onBackPressed()`, migrate to `OnBackPressedCallback` so the predictive back gesture works correctly. The SDK does not consume back events on its own.
+* **Large-screen orientation / resize constraints**: On displays with smallest width >= 600dp, restrictions such as `screenOrientation`, `resizeableActivity=false`, and aspect-ratio limits are ignored. Verify the layout that hosts `PmWebView` on tablets and foldables.
